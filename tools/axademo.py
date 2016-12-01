@@ -97,12 +97,12 @@ def extract_roi(class_name, dets, thresh=0.5):
             bbox[2] += 0.1 * (bbox[2] - bbox[0])
         elif class_name == 'prenom':
             bbox[0] += 2.5 * hight
-            bbox[2] += 0.1 * (bbox[2] - bbox[0])
+            bbox[2] += 0.15 * (bbox[2] - bbox[0])
             bbox[3] += 0.2 * hight
         elif class_name == 'lieu':
             bbox[0] += 0.8 * hight
-            # bbox[2] += 0.1 * (bbox[2] - bbox[0])
-            # bbox[3] += 0.1 * (bbox[3] - bbox[1])
+            bbox[2] += 0.3 * hight
+            bbox[3] += 0.1 * hight
 
         pts = [int(bx) for bx in bbox]
         regions.append(pts)
@@ -142,7 +142,8 @@ def demo(net, image_name):
             txt = clstm_ocr(im[bbx[1]:bbx[3], bbx[0]:bbx[2]], cls=='lieu')
             res[cls] = (bbx, txt)
         # vis_detections(im, cls, dets, thresh=CONF_THRESH)
-    return im, res, (len(res) > 1, '%.3f' % (timer.total_time))
+    im = im[:, :, (2, 1, 0)]
+    return (im, res, timer.total_time)
 
 
 def check(boxes, scores, thresh=0.8, nms_thresh=0.3):
@@ -161,6 +162,9 @@ def check(boxes, scores, thresh=0.8, nms_thresh=0.3):
             return False
     return True
 
+
+"""demo2 is a complement for demo, in considering the multi-cni case 
+    and if we should do faster-rcnn a second time"""
 def demo2(net, image_name):
     """Detect object classes in an image using pre-computed object proposals."""
 
@@ -204,26 +208,28 @@ def demo2(net, image_name):
         keep = nms(dets, NMS_THRESH)
         dets = dets[keep, :]
         inds = np.where(dets[:, -1] >= CONF_THRESH)[0]
+        tot_info_cni = []
         for i in inds:
             bbox = dets[i, :4]
             score = dets[i, -1]
             coef = 1.05
-            pmax = im.shape[:2]
+            pmax = im.shape[:2][::-1]
             for ind in xrange(4):
                 if ind < 2:
                     bbox[ind] = bbox[ind] / coef
                 else:
                     bbox[ind] = min(bbox[ind] * coef, pmax[ind - 2])
-            print 'Saving recognized image...'
+            print 'Saving recognized cni...'
             pts = [int(bx) for bx in bbox]
             filename_ = str(datetime.datetime.now()).replace(' ', '_') + \
                 werkzeug.secure_filename('output' + str(i) + '.png')
             filename = os.path.join(UPLOAD_FOLDER, filename_)
             cv2.imwrite(filename, im[pts[1]:pts[3], pts[0]:pts[2]])
-            return demo(net, filename)
+            tot_info_cni.append(demo(net, filename))
         #vis_detections(im, cls, dets, thresh=CONF_THRESH)
+        return tot_info_cni, timer.total_time
     im = im[:, :, (2, 1, 0)]
-    return im, res, (len(res) > 1, '%.3f' % (timer.total_time))
+    return [(im, res, timer.total_time)], 0  # equivalent to demo
 
 def parse_args():
     """Parse input arguments."""

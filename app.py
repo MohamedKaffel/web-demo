@@ -92,36 +92,36 @@ def classify_upload():
         )
 
     result = app.clf.classify_image(image)
-    proba = result[2]  # array of (cls_name, probability)
-    doc_array = ['cni', 'passport', 'other']
-    try:
-        doctype = doc_array.index(proba[0][0])  # find index of most probable class name 
-    except ValueError:
-        doctype = -1
-    is_cni = (doctype == 0)
-    roiinfo = (False, 0.0)
+    proba_list = result[2]  # array of (cls_name, probability)
+    is_cni = True # proba_list[0][0] == 'cni'
 
+    ptime = 0.0
     images = []
-    images.append(image)
-    bboxes = []
-    texts = {}
+    images.append(image) # for classification display
+    bboxes, texts = [], []
     if is_cni:
         logging.info('Extracting Region of Interest in CNI...')
-        img, res, roiinfo = detect_cni(filename)
-        images.append(img)
-        for cls in res:
-            # print cls, res[cls]
-            bboxes.append(res[cls][0])
-            texts[cls] = res[cls][1]
+        cnis, preproc_time = detect_cni(filename) # img, res
+        ptime += preproc_time
+        for img, res, pt in cnis:
+            ptime += pt
+            images.append(img)
+            bbox, text = [], {}
+            for cls in res:
+                # print cls, res[cls]
+                bbox.append(res[cls][0])
+                text[cls] = res[cls][1]
+            bboxes.append(bbox)
+            texts.append(text)
     else:
         images.append(image) ## for future use, just to avoid bug now
 
     return flask.render_template(
-        'index.html', has_result=True, result=result, text=texts,
-        imagesrc=embed_image_html(images, bboxes), is_cni=is_cni, roiinfo=roiinfo
+        'index.html', has_result=True, result=result, doc_info=texts, proc_time='%.3f' % (ptime),
+        imagesrc=embed_image_html(images, bboxes), is_cni=is_cni
     )
 
-def embed_image_html(images, bboxes=None):
+def embed_image_html(images, bboxes):
     """Creates an image embedded in HTML base64 format."""
     embed_images = []
     for im_ind, image in enumerate(images):        
@@ -133,7 +133,7 @@ def embed_image_html(images, bboxes=None):
             data = string_buf.getvalue().encode('base64').replace('\n', '')
             embed_images.append('data:image/png;base64,' + data)
         else:
-            for bbox in bboxes:
+            for bbox in bboxes[im_ind - 1]:
                 img = image[bbox[1]:bbox[3], bbox[0]:bbox[2]]
                 image_pil = Image.fromarray(img.astype('uint8'))
                 string_buf = StringIO.StringIO()
