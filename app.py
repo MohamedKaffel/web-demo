@@ -106,13 +106,13 @@ def classify_upload():
         for img, res, pt in cnis:
             ptime += pt
             images.append(img)
-            bbox, text = [], {}
+            bbox, text_info = [], {}
             for cls in res:
                 # print cls, res[cls]
                 bbox.append(res[cls][0])
-                text[cls] = res[cls][1]
+                text_info[cls] = (res[cls][1], '%.3f' % (res[cls][2]))   # (content, prob)
             bboxes.append(bbox)
-            texts.append(text)
+            texts.append(text_info)
     else:
         images.append(image) ## for future use, just to avoid bug now
 

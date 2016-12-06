@@ -49,7 +49,7 @@
     <!-- Begin page content -->
     <div class="container">
       <div class="page-header">
-        <h1><a href="/">Faster R-CNN and OCR Demos v2.1.0</a></h1>
+        <h1><a href="/">Faster R-CNN and OCR Demos v2.2.0</a></h1>
         <p>
           The <a href="http://caffe.berkeleyvision.org">Caffe</a> neural network library makes implementing state-of-the-art computer vision systems easy.
         </p>
@@ -125,7 +125,7 @@
                 {% for cni_texts in doc_info %}
                   {% for cle in cni_texts %}
                     <li class="list-group-item">
-                    <span class="badge">{{ cni_texts[cle] }}</span>
+                    <span class="badge">{{ cni_texts[cle][0] }} ### {{cni_texts[cle][1]}}</span>
                     <h4 class="list-group-item-heading">
                       {{cle}}
                     </h4>
@@ -168,7 +168,7 @@
     <hr>
     <div id="footer">
       <div class="container">
-        <p>&copy; Berexia 2016.11.29</p>
+        <p>&copy; Berexia 2016.12.06</p>
       </div>
    </div>
  </body>

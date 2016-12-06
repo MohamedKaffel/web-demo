@@ -91,7 +91,7 @@ def extract_roi(class_name, dets, thresh=0.5):
             bbox[0] += 1.5 * hight
             bbox[1] -= 0.25 * hight
             bbox[2] += 0.2 * (bbox[2] - bbox[0])
-            bbox[3] += 0.1 * hight
+            bbox[3] += 0.15 * hight
         elif class_name == 'nomepouse':
             bbox[0] += 2.5 * hight
             bbox[2] += 0.1 * (bbox[2] - bbox[0])
@@ -101,8 +101,8 @@ def extract_roi(class_name, dets, thresh=0.5):
             bbox[3] += 0.2 * hight
         elif class_name == 'lieu':
             bbox[0] += 0.8 * hight
-            bbox[2] += 0.3 * hight
-            bbox[3] += 0.1 * hight
+            # bbox[2] += 0.25 * hight
+            # bbox[3] += 0.1 * hight
 
         pts = [int(bx) for bx in bbox]
         regions.append(pts)
@@ -138,9 +138,9 @@ def demo(net, image_name):
         dets = dets[keep, :]
         tmp = extract_roi(cls, dets, thresh=CONF_THRESH)
         if len(tmp) > 0:
-            bbx = tmp[0]  # TODO: Find the zone with greatest probabiloty
-            txt = clstm_ocr(im[bbx[1]:bbx[3], bbx[0]:bbx[2]], cls=='lieu')
-            res[cls] = (bbx, txt)
+            bbx = tmp[0]  # TODO: Find the zone with greatest probability
+            txt, prob = clstm_ocr(im[bbx[1]:bbx[3], bbx[0]:bbx[2]], cls=='lieu')
+            res[cls] = (bbx, txt, prob)
         # vis_detections(im, cls, dets, thresh=CONF_THRESH)
     im = im[:, :, (2, 1, 0)]
     return (im, res, timer.total_time)
@@ -195,9 +195,9 @@ def demo2(net, image_name):
             dets = dets[keep, :]
             tmp = extract_roi(cls, dets, thresh=CONF_THRESH)
             if len(tmp) > 0:
-                bbx = tmp[0]  # TODO: Find the zone with greatest probabiloty
-                txt = clstm_ocr(im[bbx[1]:bbx[3], bbx[0]:bbx[2]], cls=='lieu')
-                res[cls] = (bbx, txt)
+                bbx = tmp[0]  # TODO: Find the zone with greatest probability
+                txt, prob = clstm_ocr(im[bbx[1]:bbx[3], bbx[0]:bbx[2]], cls=='lieu')
+                res[cls] = (bbx, txt, prob)
     else:  
         cls_ind = 1 # CNI
         cls = CLASSES[cls_ind]
