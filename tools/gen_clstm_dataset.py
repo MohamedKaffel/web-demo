@@ -69,4 +69,4 @@ if __name__ == '__main__':
             print imagename
             break
     else:
-        print 'Checking and saving process finished with sucess'
+        print 'Checking and saving process finished successfully'
