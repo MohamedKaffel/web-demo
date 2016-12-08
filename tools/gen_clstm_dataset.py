@@ -6,8 +6,8 @@ DATA_DIR = '/home/haoming/Documents/data/axa_cni_dataset/data' # to be customize
 this_dir = os.path.dirname(__file__)
 
 def check(obj_name):
-    return  obj_name == 'nom' or obj_name == 'nomEpouse' \
-        or obj_name == 'prenom' or obj_name == 'lieu'
+    cibles = ['nom', 'nomEpouse', 'prenom', 'lieu']
+    return obj_name in cibles
 
 
 def parse_rec(filename):
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     with open(imagesetfile, 'r') as f:
         lines = f.readlines()
     imagenames = [x.strip() for x in lines]
-    cnt_nom, cnt_prenom, cnt_lieu, cnt_epouse = 0, 0, 0, 0
+    cnt_nom, cnt_prenom, cnt_lieu = 0, 0, 0
     for i, imagename in enumerate(imagenames):
         image_file = os.path.join(DATA_DIR, 'Images', imagename + '.png')
         img = cv2.imread(image_file)
@@ -51,21 +51,22 @@ if __name__ == '__main__':
             else:
                 cnt[obj_name] += 1
             training_img_name = imagename + '_' + obj_name + str(cnt[obj_name]) + '.png'
-            # DEST_DIR = 'lieu' if obj_name == 'lieu' else 'nom'
             DEST_DIR = obj_name
-            if not os.path.exists(DEST_DIR):
-                os.makedirs(DEST_DIR)
-            training_img_path = os.path.join(this_dir, DEST_DIR, training_img_name)
-            cv2.imwrite(training_img_path, img[pts[1]:pts[3], pts[0]:pts[2]])
+            targets = ['mrz']
+            if DEST_DIR in targets:
+                if not os.path.exists(DEST_DIR):
+                    os.makedirs(DEST_DIR)
+                training_img_path = os.path.join(this_dir, DEST_DIR, training_img_name)
+                cv2.imwrite(training_img_path, img[pts[1]:pts[3], pts[0]:pts[2]])
             if obj_name == 'nom':
                 cnt_nom += 1
-            if obj_name == 'prenom':
+            elif obj_name == 'prenom':
                 cnt_prenom += 1
-            if obj_name == 'lieu':
+            elif obj_name == 'lieu':
                 cnt_lieu += 1
-            if obj_name == 'nomEpouse':
-                cnt_epouse += 1
         print cnt_nom, cnt_prenom, cnt_lieu
         if cnt_nom != cnt_prenom or cnt_prenom != cnt_lieu:
             print imagename
             break
+    else:
+        print 'Checking and saving process finished with sucess'
