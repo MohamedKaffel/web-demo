@@ -52,8 +52,8 @@ if __name__ == '__main__':
                 cnt[obj_name] += 1
             training_img_name = imagename + '_' + obj_name + str(cnt[obj_name]) + '.png'
             DEST_DIR = obj_name
-            targets = ['mrz']
-            if DEST_DIR in targets:
+            saving_targets = ['prenom']
+            if DEST_DIR in saving_targets:
                 if not os.path.exists(DEST_DIR):
                     os.makedirs(DEST_DIR)
                 training_img_path = os.path.join(this_dir, DEST_DIR, training_img_name)

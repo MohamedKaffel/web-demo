@@ -94,14 +94,15 @@ def extract_roi(class_name, dets, thresh=0.5):
             bbox[3] += 0.15 * hight
         elif class_name == 'nomepouse':
             bbox[0] += 2.5 * hight
-            bbox[2] += 0.1 * (bbox[2] - bbox[0])
+            bbox[2] += 0.15 * (bbox[2] - bbox[0])
+            bbox[3] += 0.2 * hight
         elif class_name == 'prenom':
             bbox[0] += 2.5 * hight
             bbox[2] += 0.15 * (bbox[2] - bbox[0])
             bbox[3] += 0.2 * hight
         elif class_name == 'lieu':
             bbox[0] += 0.8 * hight
-            # bbox[2] += 0.25 * hight
+            bbox[2] += 0.5 * hight
             # bbox[3] += 0.1 * hight
 
         pts = [int(bx) for bx in bbox]
@@ -284,7 +285,7 @@ def main():
 
     prototxt = os.path.join(cfg.MODELS_DIR, NETS[args.demo_net][0],
                             'faster_rcnn_alt_opt', 'faster_rcnn_test.pt')
-    caffemodel = os.path.join(cfg.DATA_DIR, 'faster_rcnn_models',
+    caffemodel = os.path.join(cfg.DATA_DIR, 'faster_rcnn_models', 'old',
                               NETS[args.demo_net][1])
 
     if not os.path.isfile(caffemodel):
