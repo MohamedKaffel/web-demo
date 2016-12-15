@@ -99,9 +99,12 @@ def classify_upload():
     images = []
     images.append(image) # for classification display
     bboxes, texts = [], []
+    starttime, endtime = 0, 0
     if is_cni:
         logging.info('Extracting Region of Interest in CNI...')
+        starttime = time.time()
         cnis, preproc_time = detect_cni(filename) # img, res
+        endtime = time.time()
         ptime += preproc_time
         for img, res, pt in cnis:
             ptime += pt
@@ -118,7 +121,7 @@ def classify_upload():
 
     return flask.render_template(
         'index.html', has_result=True, result=result, doc_info=texts, proc_time='%.3f' % (ptime),
-        imagesrc=embed_image_html(images, bboxes), is_cni=is_cni
+        imagesrc=embed_image_html(images, bboxes), is_cni=is_cni, total_time='%.3f' % (endtime - starttime)
     )
 
 def embed_image_html(images, bboxes):
