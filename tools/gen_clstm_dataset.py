@@ -28,6 +28,9 @@ def parse_rec(filename):
 
     return objects
 
+def get_folder(filename):
+    tree = ET.parse(filename)
+    return tree.find('folder').text
 
 if __name__ == '__main__':
     annopath = os.path.join(
@@ -50,9 +53,11 @@ if __name__ == '__main__':
                 cnt[obj_name] = 0
             else:
                 cnt[obj_name] += 1
-            training_img_name = imagename + '_' + obj_name + str(cnt[obj_name]) + '.png'
+            folder = get_folder(annopath.format(imagename))
+            training_img_name = imagename + '_' + obj_name \
+            + str(cnt[obj_name]) + '_' + folder + '.png'
             DEST_DIR = obj_name
-            saving_targets = ['prenom']
+            saving_targets = ['nom', 'prenom', 'nomEpouse']
             if DEST_DIR in saving_targets:
                 if not os.path.exists(DEST_DIR):
                     os.makedirs(DEST_DIR)

@@ -19,7 +19,7 @@ from fast_rcnn.config import cfg
 from fast_rcnn.test import im_detect
 from fast_rcnn.nms_wrapper import nms
 from utils.timer import Timer
-from ocr.clstm import clstm_ocr
+from ocr.clstm import clstm_ocr, clstm_ocr_calib
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io as sio
@@ -27,6 +27,7 @@ import caffe, os, sys, cv2
 import argparse
 import werkzeug
 import datetime
+import math
 
 
 CLASSES = ('__background__', # always index 0
@@ -197,7 +198,8 @@ def demo2(net, image_name):
             tmp = extract_roi(cls, dets, thresh=CONF_THRESH)
             if len(tmp) > 0:
                 bbx = tmp[0]  # TODO: Find the zone with greatest probability
-                txt, prob = clstm_ocr(im[bbx[1]:bbx[3], bbx[0]:bbx[2]], cls=='lieu')
+                # txt, prob = clstm_ocr(im[bbx[1]:bbx[3], bbx[0]:bbx[2]], cls=='lieu')
+                txt, prob =calib_roi(im, bbx, cls)
                 res[cls] = (bbx, txt, prob)
     else:  
         cls_ind = 1 # CNI
@@ -276,7 +278,17 @@ def detect_cni(filename):
     print 'Demo for classified CNI image...'
     return demo2(net, filename)
 
-
+def calib_roi(im,bbx,cls):
+    txt, prob = clstm_ocr(im[bbx[1]:bbx[3], bbx[0]:bbx[2]], cls=='lieu')
+    if(prob < 0.95):
+        for i in range(0,2):
+            for j in range(0,2):
+                txt_temp,prob_temp=clstm_ocr_calib(im[bbx[1]-5*i*math.pow(-1, j):bbx[3]+5*i*math.pow(-1, j), \
+                                                bbx[0]-3*i*math.pow(-1, j):bbx[2]+3*i*math.pow(-1, j)], cls=='lieu')
+                if(prob < prob_temp):
+                    txt = txt_temp
+                    prob = prob_temp
+    return txt, prob
 
 def main():
     cfg.TEST.HAS_RPN = True  # Use RPN for proposals

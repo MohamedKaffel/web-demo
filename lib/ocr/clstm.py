@@ -63,7 +63,7 @@ def clean(s):
 def similar(a, b):
 	return difflib.SequenceMatcher(None, a, b).ratio()
 
-def check_prenom(raw_string):
+def check_prenom(raw_string, seuil):
 	print "Checking prenom... " + raw_string
 	res = ""
 	if ':' in raw_string:
@@ -80,20 +80,20 @@ def check_prenom(raw_string):
 		res += result + ', '
 	return res[:-2], 0
 
-def check_lieu(raw_string):
+def check_lieu(raw_string, seuil):
 	print "Checking birth place... " + raw_string
 	dict_file = os.path.join(this_dir, 'lieux.txt')
 	with open(dict_file, 'r') as f:
 		lines = f.readlines()
 	words = [unicode(x.strip()) for x in lines]
-	word_proposals = difflib.get_close_matches(unicode(raw_string), words, 1)
+	word_proposals = difflib.get_close_matches(unicode(raw_string), words, 1, seuil)
 	if len(word_proposals) > 0:
 		return word_proposals[0], similar(word_proposals[0], raw_string)
 	else:
 		return raw_string, 0
 
-def check(s, islieu=False):
-	return check_lieu(s) if islieu else check_prenom(s)
+def check(s, islieu=False, seuil=0.6):
+	return check_lieu(s, seuil) if islieu else check_prenom(s, seuil)
 
 def clstm_ocr(img, islieu=False):
 	if not os.path.exists(CACHE_FOLDER):
@@ -119,11 +119,29 @@ def clstm_ocr(img, islieu=False):
 					if (maxPro > 0.95) and (len(text) >= 2):
 						break
 	""" if result is not good enough, we do dictionary verification """
-	if maxPro < 1:
+	if maxPro < 1 and islieu:
 		ocr_result, prob = check(ocr_result, islieu)
 		maxPro = max(prob, maxPro)
 	return (ocr_result, maxPro)
 
+
+def clstm_ocr_calib(img, islieu=False):
+	if not os.path.exists(CACHE_FOLDER):
+		os.makedirs(CACHE_FOLDER)
+	model_path = os.path.join(this_dir, 'model-nomprenom2911-binary.clstm')
+	if islieu:
+		model_path = os.path.join(this_dir, 'model-lieu2911-binary.clstm')
+		#model_path = os.path.join(this_dir, 'model-lieu-1212-binary.clstm')
+	converted_image_path, image = convert_to_binary(img)
+	#maxPro = 0
+	#ocr_result = ""
+	ocr_result, maxPro=extract_text(converted_image_path, model_path)
+	if(islieu):
+		if(maxPro<0.9):
+			ocr_result = check(ocr_result, islieu, 0.5)
+		else:
+			ocr_result = check(ocr_result, islieu)
+	return (ocr_result, maxPro)
 
 if __name__ == '__main__':
 	# filename = os.path.join(this_dir, 'demo', 'lieu0.png')

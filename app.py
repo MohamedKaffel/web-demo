@@ -236,7 +236,7 @@ class ImagenetClassifier(object):
                            'image. Maybe try another one?')
 
 
-def start_tornado(app, port=5000):
+def start_tornado(app, port=8443):
     http_server = tornado.httpserver.HTTPServer(
         tornado.wsgi.WSGIContainer(app))
     http_server.listen(port)
@@ -256,7 +256,7 @@ def start_from_terminal(app):
     parser.add_option(
         '-p', '--port',
         help="which port to serve content on",
-        type='int', default=5000)
+        type='int', default=8443)
     parser.add_option(
         '-g', '--gpu',
         help="use gpu mode",
