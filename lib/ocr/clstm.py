@@ -70,6 +70,8 @@ def check_prenom(raw_string, seuil):
 		ind = raw_string.index(':')
 		raw_string = raw_string[ind:]
 	utiles = [clean(x.split()[-1]) for x in raw_string.split(',') if len(x.split()) > 0]
+	print utiles
+	return ', '.join(s for s in utiles if len(s) > 0), 0 # to be modified
 	dict_file = os.path.join(this_dir, 'prenoms.txt')
 	with open(dict_file, 'r') as f:
 		lines = f.readlines()
@@ -119,7 +121,7 @@ def clstm_ocr(img, islieu=False):
 					if (maxPro > 0.95) and (len(text) >= 2):
 						break
 	""" if result is not good enough, we do dictionary verification """
-	if maxPro < 1 and islieu:
+	if maxPro < 1:
 		ocr_result, prob = check(ocr_result, islieu)
 		maxPro = max(prob, maxPro)
 	return (ocr_result, maxPro)

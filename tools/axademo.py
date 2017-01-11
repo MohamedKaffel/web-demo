@@ -141,7 +141,9 @@ def demo(net, image_name):
         tmp = extract_roi(cls, dets, thresh=CONF_THRESH)
         if len(tmp) > 0:
             bbx = tmp[0]  # TODO: Find the zone with greatest probability
-            txt, prob = clstm_ocr(im[bbx[1]:bbx[3], bbx[0]:bbx[2]], cls=='lieu')
+            # txt, prob = clstm_ocr(im[bbx[1]:bbx[3], bbx[0]:bbx[2]], cls=='lieu')
+            # res[cls] = (bbx, txt, prob)
+            txt, prob = calib_roi(im, bbx, cls)
             res[cls] = (bbx, txt, prob)
         # vis_detections(im, cls, dets, thresh=CONF_THRESH)
     im = im[:, :, (2, 1, 0)]
